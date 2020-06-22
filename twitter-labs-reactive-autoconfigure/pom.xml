@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>twitter-labs-reactive</artifactId>
+        <groupId>com.rj93.twitter</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>twitter-labs-reactive-autoconfigure</artifactId>
+    <name>twitter-labs-reactive-autoconfigure</name>
+    <description>Core Implementation of Twitter Labs Streaming APIs</description>
+
+    <properties>
+        <twitter.labs.version>0.0.1-SNAPSHOT</twitter.labs.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.rj93.twitter</groupId>
+            <artifactId>twitter-labs-reactive-core</artifactId>
+            <version>${twitter.labs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+
+
+</project>
