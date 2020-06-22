@@ -13,11 +13,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.security.oauth2.client.web.server.UnAuthenticatedServerOAuth2AuthorizedClientRepository;
-import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -30,6 +33,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class TwitterAutoConfiguration {
 
     private static final String TWITTER_CLIENT_REGISTRATION_ID = "twitter";
+    private static final String TWITTER_LABS_BASE_URL = "https://api.twitter.com/labs";
 
     @Bean
     TwitterLabsService tweetLabsService(@Qualifier("twitterLabsWebClient") WebClient webClient) {
@@ -37,22 +41,41 @@ public class TwitterAutoConfiguration {
     }
 
     @Bean(name = "twitterLabsWebClient")
-    WebClient twitterLab(ReactiveClientRegistrationRepository clientRegistrationRepository) {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("twitter").block();
-
-        ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2 = new ServerOAuth2AuthorizedClientExchangeFilterFunction(clientRegistrationRepository, new UnAuthenticatedServerOAuth2AuthorizedClientRepository());
+    WebClient twitterLab(ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager) {
+        ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2 =
+                new ServerOAuth2AuthorizedClientExchangeFilterFunction(reactiveOAuth2AuthorizedClientManager);
         oauth2.setDefaultClientRegistrationId(TWITTER_CLIENT_REGISTRATION_ID);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ExchangeStrategies strategies = ExchangeStrategies.builder().codecs(clientCodecConfigurer ->
-                clientCodecConfigurer.customCodecs().registerWithDefaultConfig(
-                        new Jackson2JsonDecoder(objectMapper, new MimeType("application", "octet-stream")))
-        ).build();
+        Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), MimeTypeUtils.APPLICATION_OCTET_STREAM);
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(clientCodecConfigurer -> clientCodecConfigurer
+                        .customCodecs()
+                        .registerWithDefaultConfig(decoder)
+                )
+                .build();
 
         return WebClient.builder()
-                .baseUrl("https://api.twitter.com/labs")
+                .baseUrl(TWITTER_LABS_BASE_URL)
                 .exchangeStrategies(strategies)
                 .filter(oauth2)
                 .build();
+    }
+
+    @Bean
+    public ReactiveOAuth2AuthorizedClientManager authorizedClientManager(
+            ReactiveClientRegistrationRepository clientRegistrationRepository,
+            ReactiveOAuth2AuthorizedClientService authorizedClientService) {
+
+        ReactiveOAuth2AuthorizedClientProvider authorizedClientProvider =
+                ReactiveOAuth2AuthorizedClientProviderBuilder.builder()
+                        .clientCredentials()
+                        .build();
+
+        AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager authorizedClientManager =
+                new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(
+                        clientRegistrationRepository, authorizedClientService);
+        authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+
+        return authorizedClientManager;
     }
 }
