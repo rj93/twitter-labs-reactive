@@ -13,8 +13,6 @@ jobs:
     name: Build Project using Java ${{ matrix.java }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      BB_MAVEN_USERNAME: ${{ secrets.BB_MAVEN_USERNAME }}
-      BB_MAVEN_PASSWORD: ${{ secrets.BB_MAVEN_PASSWORD }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/cache@v1
