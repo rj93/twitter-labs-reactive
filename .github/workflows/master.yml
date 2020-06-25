@@ -1,0 +1,50 @@
+name: Build twitter-reactive-labs
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [11]
+    name: Build Project using Java ${{ matrix.java }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BB_MAVEN_USERNAME: ${{ secrets.BB_MAVEN_USERNAME }}
+      BB_MAVEN_PASSWORD: ${{ secrets.BB_MAVEN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Remove Snapshot
+        run: mvn versions:set -DremoveSnapshot
+
+      - name: Build
+        run: mvn clean install
+
+      - name: Publish to GitHub Packages
+        run: mvn deploy -Dregistry=https://maven.pkg.github.com/rj93 -Dtoken=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Next Snapshot Version
+        run: mvn versions:set -DnextSnapshot
+
+      - name: Commit Next Snapshot Version
+        uses: EndBug/add-and-commit@v4
+        with:
+          message: "Increment Snapshot Version"
+          add: "pom.xml"
+          force: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

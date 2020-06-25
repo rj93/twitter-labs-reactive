@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>twitter-labs-reactive-core</artifactId>
-    <name>twitter-labs-reactive-com.rj93.twitter.core</name>
+    <name>twitter-labs-reactive-core</name>
     <description>Core Implementation of Twitter Labs Streaming APIs</description>
 
     <dependencies>
