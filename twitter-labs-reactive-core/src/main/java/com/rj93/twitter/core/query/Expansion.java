@@ -17,14 +17,11 @@ public enum Expansion {
     private static final Map<String, Expansion> CONSTANTS = new HashMap();
 
     static {
-        Expansion[] var0 = values();
-        int var1 = var0.length;
-
-        for (int var2 = 0; var2 < var1; ++var2) {
-            Expansion c = var0[var2];
-            CONSTANTS.put(c.value, c);
+        Expansion[] values = values();
+        for (int i = 0; i < values.length; ++i) {
+            Expansion value = values[i];
+            CONSTANTS.put(value.value, value);
         }
-
     }
 
     private String value;
@@ -35,7 +32,7 @@ public enum Expansion {
 
     @JsonCreator
     public static Expansion fromValue(String value) {
-        Expansion constant = (Expansion) CONSTANTS.get(value);
+        Expansion constant = CONSTANTS.get(value);
         if (constant == null) {
             throw new IllegalArgumentException(value);
         } else {

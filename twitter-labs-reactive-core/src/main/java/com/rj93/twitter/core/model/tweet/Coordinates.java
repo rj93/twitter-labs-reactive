@@ -3,6 +3,7 @@ package com.rj93.twitter.core.model.tweet;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.rj93.twitter.core.query.Expansion;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +28,11 @@ public class Coordinates {
         private static final Map<String, Type> CONSTANTS = new HashMap();
 
         static {
-            Type[] var0 = values();
-            int var1 = var0.length;
-
-            for (int var2 = 0; var2 < var1; ++var2) {
-                Type c = var0[var2];
-                CONSTANTS.put(c.value, c);
+            Type[] values = values();
+            for (int i = 0; i < values.length; ++i) {
+                Type value = values[i];
+                CONSTANTS.put(value.value, value);
             }
-
         }
 
         private String value;
@@ -45,7 +43,7 @@ public class Coordinates {
 
         @JsonCreator
         public static Type fromValue(String value) {
-            Type constant = (Type) CONSTANTS.get(value);
+            Type constant = CONSTANTS.get(value);
             if (constant == null) {
                 throw new IllegalArgumentException(value);
             } else {

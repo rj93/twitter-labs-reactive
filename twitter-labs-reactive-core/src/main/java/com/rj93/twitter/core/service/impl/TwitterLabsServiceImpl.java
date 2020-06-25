@@ -47,7 +47,7 @@ public class TwitterLabsServiceImpl implements TwitterLabsService {
     @Override
     public Flux<Tweet> sample(StreamParameters streamParameters) {
         return webClient.get()
-                .uri(uriBuilder -> buildUri(uriBuilder, SAMPLE_PATH, streamParameters))
+                .uri(uriBuilder -> buildStreamUri(uriBuilder, SAMPLE_PATH, streamParameters))
                 .exchange()
                 .flatMapMany(this::handleResponse);
     }
@@ -55,7 +55,7 @@ public class TwitterLabsServiceImpl implements TwitterLabsService {
     @Override
     public Flux<Tweet> filter(StreamParameters streamParameters) {
         return webClient.get()
-                .uri(uriBuilder -> buildUri(uriBuilder, FILTER_PATH, streamParameters))
+                .uri(uriBuilder -> buildStreamUri(uriBuilder, FILTER_PATH, streamParameters))
                 .exchange()
                 .flatMapMany(this::handleResponse);
     }
@@ -71,8 +71,7 @@ public class TwitterLabsServiceImpl implements TwitterLabsService {
                     return uriBuilder.build();
                 })
                 .exchange()
-                .flatMap(clientResponse -> clientResponse.bodyToMono(new ParameterizedTypeReference<DataWrapper<List<Rule>>>() {
-                }));
+                .flatMap(clientResponse -> clientResponse.bodyToMono(new ParameterizedTypeReference<DataWrapper<List<Rule>>>() {}));
     }
 
     @Override
@@ -108,7 +107,7 @@ public class TwitterLabsServiceImpl implements TwitterLabsService {
                 .flatMap(this::deleteRules);
     }
 
-    private URI buildUri(UriBuilder uriBuilder, String path, StreamParameters streamParameters) {
+    private URI buildStreamUri(UriBuilder uriBuilder, String path, StreamParameters streamParameters) {
         uriBuilder.path(path);
 
         if (streamParameters.getExpansions() != null && !streamParameters.getExpansions().isEmpty()) {
@@ -133,8 +132,7 @@ public class TwitterLabsServiceImpl implements TwitterLabsService {
     }
 
     private Flux<Tweet> handleResponse(ClientResponse clientResponse) {
-        return clientResponse.bodyToFlux(new ParameterizedTypeReference<DataWrapper<Tweet>>() {
-        })
+        return clientResponse.bodyToFlux(new ParameterizedTypeReference<DataWrapper<Tweet>>() {})
                 .map(DataWrapper::getData)
                 .onErrorContinue((e, o) -> log.error("Failed to deserialize tweet : {}. object: {}", e.getMessage(), o, e));
     }
