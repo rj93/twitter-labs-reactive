@@ -12,10 +12,6 @@
     <name>twitter-labs-reactive-app</name>
     <description>Core Implementation of Twitter Labs Streaming APIs</description>
 
-    <properties>
-        <twitter.labs.version>0.0.1-SNAPSHOT</twitter.labs.version>
-    </properties>
-
     <dependencies>
         <!-- Spring -->
         <dependency>
@@ -36,12 +32,12 @@
         <dependency>
             <groupId>com.rj93.twitter</groupId>
             <artifactId>twitter-labs-reactive-autoconfigure</artifactId>
-            <version>${twitter.labs.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rj93.twitter</groupId>
             <artifactId>twitter-labs-reactive-core</artifactId>
-            <version>${twitter.labs.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <!-- /Twitter Labs -->
     </dependencies>

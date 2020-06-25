@@ -1,0 +1,35 @@
+name: Build twitter-reactive-labs
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [11]
+    name: Build Project using Java ${{ matrix.java }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BB_MAVEN_USERNAME: ${{ secrets.BB_MAVEN_USERNAME }}
+      BB_MAVEN_PASSWORD: ${{ secrets.BB_MAVEN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Remove Snapshot
+        run: mvn versions:set -DremoveSnapshot
+
+      - name: Build
+        run: mvn clean install
