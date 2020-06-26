@@ -53,7 +53,5 @@ jobs:
         uses: EndBug/add-and-commit@v4
         with:
           message: "Increment Snapshot Version"
-          add: "**/pom.xml"
-          cwd: "*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
