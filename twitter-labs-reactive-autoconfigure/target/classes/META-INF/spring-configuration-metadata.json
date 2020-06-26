@@ -1,0 +1,18 @@
+{
+  "groups": [
+    {
+      "name": "twitter.oauth2",
+      "type": "com.rj93.twitter.autoconfigure.TwitterConfigurationProperties",
+      "sourceType": "com.rj93.twitter.autoconfigure.TwitterConfigurationProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "twitter.oauth2.client-registration-id",
+      "type": "java.lang.String",
+      "sourceType": "com.rj93.twitter.autoconfigure.TwitterConfigurationProperties",
+      "defaultValue": "twitter"
+    }
+  ],
+  "hints": []
+}
