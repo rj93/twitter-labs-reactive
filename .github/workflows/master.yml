@@ -54,6 +54,6 @@ jobs:
         with:
           message: "Increment Snapshot Version"
           add: "**/pom.xml"
-          force: true
+          cwd: "*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
