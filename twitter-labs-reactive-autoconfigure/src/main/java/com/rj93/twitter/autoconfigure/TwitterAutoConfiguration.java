@@ -3,18 +3,18 @@ package com.rj93.twitter.autoconfigure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rj93.twitter.core.service.TwitterLabsService;
 import com.rj93.twitter.core.service.impl.TwitterLabsServiceImpl;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties.Provider;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties.Registration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
 import org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -29,7 +29,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -38,10 +37,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 @PropertySource("classpath:twitter-oauth2.properties")
 @AutoConfigureAfter(ReactiveOAuth2ClientAutoConfiguration.class)
 @ConditionalOnClass(TwitterLabsService.class)
+@EnableConfigurationProperties(TwitterConfigurationProperties.class)
 @Slf4j
 public class TwitterAutoConfiguration {
 
-    public static final String TWITTER_CLIENT_REGISTRATION_ID = "twitter";
     private static final String TWITTER_LABS_BASE_URL = "https://api.twitter.com/labs";
 
     @Bean
@@ -50,10 +49,12 @@ public class TwitterAutoConfiguration {
     }
 
     @Bean(name = "twitterLabsWebClient")
-    WebClient twitterLab(ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager) {
+    WebClient twitterLab(
+            ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager,
+            TwitterConfigurationProperties twitterConfigurationProperties) {
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2 =
                 new ServerOAuth2AuthorizedClientExchangeFilterFunction(reactiveOAuth2AuthorizedClientManager);
-        oauth2.setDefaultClientRegistrationId(TWITTER_CLIENT_REGISTRATION_ID);
+        oauth2.setDefaultClientRegistrationId(twitterConfigurationProperties.getClientRegistrationId());
 
         Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), MimeTypeUtils.APPLICATION_OCTET_STREAM);
         ExchangeStrategies strategies = ExchangeStrategies.builder()
@@ -90,27 +91,22 @@ public class TwitterAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public ReactiveOAuth2AuthorizedClientService reactiveOAuth2AuthorizedClientService(ReactiveClientRegistrationRepository clientRegistrationRepository) {
-        return new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistrationRepository);
+    public ReactiveOAuth2AuthorizedClientService reactiveOAuth2AuthorizedClientService(
+            ReactiveClientRegistrationRepository reactiveClientRegistrationRepository) {
+        return new InMemoryReactiveOAuth2AuthorizedClientService(reactiveClientRegistrationRepository);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ReactiveClientRegistrationRepository reactiveClientRegistrationRepository(OAuth2ClientProperties oAuth2ClientProperties) {
-        Registration registration = oAuth2ClientProperties.getRegistration().get(TWITTER_CLIENT_REGISTRATION_ID);
-        Provider provider = oAuth2ClientProperties.getProvider().get(TWITTER_CLIENT_REGISTRATION_ID);
-        ClientRegistration clientRegistration = createClientRegistration(registration, provider);
-        return new InMemoryReactiveClientRegistrationRepository(Collections.singletonList(clientRegistration));
-    }
+    public ReactiveClientRegistrationRepository reactiveClientRegistrationRepository(
+            OAuth2ClientProperties oAuth2ClientProperties) {
 
-    private ClientRegistration createClientRegistration(Registration registration, Provider provider) {
-        return ClientRegistration
-                .withRegistrationId(TWITTER_CLIENT_REGISTRATION_ID)
-                .tokenUri(provider.getTokenUri())
-                .authorizationGrantType(new AuthorizationGrantType(registration.getAuthorizationGrantType()))
-                .clientId(registration.getClientId())
-                .clientSecret(registration.getClientSecret())
-                .build();
+        List<ClientRegistration> registrations = new ArrayList<>(
+                OAuth2ClientPropertiesRegistrationAdapter
+                        .getClientRegistrations(oAuth2ClientProperties)
+                        .values()
+        );
+        return new InMemoryReactiveClientRegistrationRepository(registrations);
     }
 
 }
