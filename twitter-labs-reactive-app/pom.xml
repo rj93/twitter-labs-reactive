@@ -6,7 +6,7 @@
     <parent>
         <artifactId>twitter-labs-reactive</artifactId>
         <groupId>com.rj93.twitter</groupId>
-        <version>0.0.7-SNAPSHOT</version>
+        <version>0.0.8-SNAPSHOT</version>
     </parent>
     <artifactId>twitter-labs-reactive-app</artifactId>
     <name>twitter-labs-reactive-app</name>
