@@ -41,6 +41,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class TwitterAutoConfiguration {
 
+    private static final String TWITTER_OAUTH2_REGISTRATION_ID = "twitter";
     private static final String TWITTER_LABS_BASE_URL = "https://api.twitter.com/labs";
 
     @Bean
@@ -49,12 +50,10 @@ public class TwitterAutoConfiguration {
     }
 
     @Bean(name = "twitterLabsWebClient")
-    WebClient twitterLab(
-            ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager,
-            TwitterConfigurationProperties twitterConfigurationProperties) {
+    WebClient twitterLab(ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager) {
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2 =
                 new ServerOAuth2AuthorizedClientExchangeFilterFunction(reactiveOAuth2AuthorizedClientManager);
-        oauth2.setDefaultClientRegistrationId(twitterConfigurationProperties.getClientRegistrationId());
+        oauth2.setDefaultClientRegistrationId(TWITTER_OAUTH2_REGISTRATION_ID);
 
         Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), MimeTypeUtils.APPLICATION_OCTET_STREAM);
         ExchangeStrategies strategies = ExchangeStrategies.builder()

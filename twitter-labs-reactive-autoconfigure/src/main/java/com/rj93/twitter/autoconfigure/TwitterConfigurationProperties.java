@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties("twitter.oauth2")
 public class TwitterConfigurationProperties {
-    private String clientRegistrationId = "twitter";
+    private String clientId;
+    private String clientSecret;
 }
