@@ -36,4 +36,5 @@ public class Tweet {
     private String source;
     private List<ContextAnnotation> contextAnnotations;
     private Format format;
+    private Withheld withheld;
 }
