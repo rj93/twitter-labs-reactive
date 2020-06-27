@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 public interface TwitterLabsService {
 
     default Flux<Tweet> sample() {
-        return filter(new StreamParameters());
+        return sample(new StreamParameters());
     }
 
     Flux<Tweet> sample(StreamParameters streamParameters);
